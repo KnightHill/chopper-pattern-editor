@@ -16,7 +16,33 @@ struct Element {
   Duration duration;
 };
 
+const int pattern_row = 7;
+const int pattern_left = 5;
+
 std::vector<Element> pattern;
+
+void draw_element(Element el, int &col) {
+  char ch = el.type == Note ? 'x' : '.';
+  int len;
+  switch (el.duration) {
+  case D16:
+    len = 1;
+    break;
+  case D8:
+    len = 2;
+    break;
+  case D4:
+    len = 4;
+    break;
+  }
+
+  for (int j = 0; j < len; j++) {
+    mvaddch(pattern_row, pattern_left + col + j, ch);
+  }
+
+  mvaddch(pattern_row, pattern_left + col + len, '|');
+  col += len + 1;
+}
 
 int main() {
 
@@ -57,59 +83,12 @@ int main() {
     }
 
     // Draw the pattern
-    const int pattern_row = 7;
-    const int pattern_left = 5;
     int col = 0;
-
     mvaddch(pattern_row, pattern_left - 1, '|');
 
     for (size_t i = 0; i < pattern.size(); i++) {
       Element e = pattern[i];
-      if (e.type == Note) {
-        switch (e.duration) {
-        case D16:
-          mvaddch(pattern_row, pattern_left + col, 'x');
-          mvaddch(pattern_row, pattern_left + col + 1, '|');
-          col += 2;
-          break;
-        case D8:
-          mvaddch(pattern_row, pattern_left + col, 'x');
-          mvaddch(pattern_row, pattern_left + col + 1, 'x');
-          mvaddch(pattern_row, pattern_left + col + 2, '|');
-          col += 3;
-          break;
-        case D4:
-          mvaddch(pattern_row, pattern_left + col, 'x');
-          mvaddch(pattern_row, pattern_left + col + 1, 'x');
-          mvaddch(pattern_row, pattern_left + col + 2, 'x');
-          mvaddch(pattern_row, pattern_left + col + 3, 'x');
-          mvaddch(pattern_row, pattern_left + col + 4, '|');
-          col += 5;
-          break;
-        }
-      } else {
-        switch (e.duration) {
-        case D16:
-          mvaddch(pattern_row, pattern_left + col, '.');
-          mvaddch(pattern_row, pattern_left + col + 1, '|');
-          col += 2;
-          break;
-        case D8:
-          mvaddch(pattern_row, pattern_left + col, '.');
-          mvaddch(pattern_row, pattern_left + col + 1, '.');
-          mvaddch(pattern_row, pattern_left + col + 2, '|');
-          col += 3;
-          break;
-        case D4:
-          mvaddch(pattern_row, pattern_left + col, '.');
-          mvaddch(pattern_row, pattern_left + col + 1, '.');
-          mvaddch(pattern_row, pattern_left + col + 2, '.');
-          mvaddch(pattern_row, pattern_left + col + 3, '.');
-          mvaddch(pattern_row, pattern_left + col + 4, '|');
-          col += 5;
-          break;
-        }
-      }
+      draw_element(e, col);
     }
 
     refresh();
