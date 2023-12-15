@@ -1,5 +1,7 @@
 #include <ncurses.h>
 
+// gcc main.cpp -lncurses -o editor
+
 int main() {
   initscr();
   raw();                /* Line buffering disabled	*/
