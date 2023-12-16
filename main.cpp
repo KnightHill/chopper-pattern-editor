@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <ncurses.h>
+#include <string>
 #include <vector>
 
 // g++ -Wall main.cpp -lncurses -o editor
@@ -26,7 +27,8 @@ const int pattern_left = 5;
 
 std::vector<Element> pattern;
 
-int get_pattern_len() {
+int get_pattern_len()
+{
   int len = 0;
   for (size_t i = 0; i < pattern.size(); i++) {
     Element el = pattern[i];
@@ -35,7 +37,8 @@ int get_pattern_len() {
   return len;
 }
 
-int get_element_len(Element el) {
+int get_element_len(Element el)
+{
   switch (el.duration) {
   case D16:
   default:
@@ -47,7 +50,28 @@ int get_element_len(Element el) {
   }
 }
 
-void draw_element(Element el, int &col, int &pos) {
+/*
+    {14, {{1, D8}, {1, D16}, {1, D16}, {1, D16}, {1, D16}, {1, D16}, {1, D16},
+   {1, D8}, {1, D16}, {1, D16}, {1, D16}, {1, D16}, {1, D16}, {1, D16}}
+   },
+*/
+void generate()
+{
+  char temp[40];
+  std::string buffer("{");
+
+  sprintf(temp, "%d,{", (int)pattern.size());
+  buffer.append(temp);
+
+  for (size_t i = 0; i < pattern.size(); i++) {
+    Element el = pattern[i];
+  }
+
+  buffer.append("},");
+}
+
+void draw_element(Element el, int &col, int &pos)
+{
   char ch = el.type == Note ? '=' : '.';
   int len = get_element_len(el);
 
@@ -64,7 +88,8 @@ void draw_element(Element el, int &col, int &pos) {
   pos += len;
 }
 
-int main() {
+int main()
+{
 
   initscr();
   raw();                // Line buffering disabled
@@ -85,9 +110,7 @@ int main() {
   mvprintw(0, 0, "-- Pattern Editor --");
   mvprintw(2, 0, " Add Note: 1/4 - q, 1/8 - w, 1/16 - e");
   mvprintw(3, 0, "Add Pause: 1/4 - a, 1/8 - s, 1/16 - d");
-  mvprintw(
-      4, 0,
-      " Commands: z - delete last, r - render, v - clear pattern, x - exit");
+  mvprintw(4, 0, " Commands: z - delete last, r - render, v - clear pattern, x - exit");
   refresh();
 
   int ch;
