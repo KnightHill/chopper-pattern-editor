@@ -16,10 +16,23 @@ struct Element {
   Duration duration;
 };
 
+// prototypes
+int get_element_len(Element el);
+int get_pattern_len();
+
 const int pattern_top = 7;
 const int pattern_left = 5;
 
 std::vector<Element> pattern;
+
+int get_pattern_len() {
+  int len = 0;
+  for (size_t i = 0; i < pattern.size(); i++) {
+    Element el = pattern[i];
+    len += get_element_len(el);
+  }
+  return len;
+}
 
 int get_element_len(Element el) {
   switch (el.duration) {
@@ -91,6 +104,9 @@ int main() {
     // Draw the pattern
     move(pattern_top, 0); // move to begining of line
     clrtoeol();           // clear line
+
+    int pattern_len = get_pattern_len();
+    mvprintw(5, 0, "Pattern length: %2d", pattern_len);
 
     if (pattern.size() > 0) {
       int col = 0;
