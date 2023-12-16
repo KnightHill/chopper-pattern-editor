@@ -63,7 +63,7 @@ int get_element_len(Element el)
 void generate()
 {
   buffer.clear();
-  buffer.append("{{");
+  buffer.append("{");
   buffer.append(format("{},{{", static_cast<int>(pattern.size())));
 
   for (size_t i = 0; i < pattern.size(); i++) {
