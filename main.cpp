@@ -1,8 +1,13 @@
 #include <cstdlib>
 #include <ncurses.h>
+#include <string>
 #include <vector>
+#include <format>
+#include <fstream>
 
-// g++ -Wall main.cpp -lncurses -o editor
+using namespace std;
+
+// g++ -std=c++20 -Wall main.cpp -lncurses -o editor
 
 enum Duration {
   D4, // quarter
@@ -24,9 +29,11 @@ int get_pattern_len();
 const int pattern_top = 7;
 const int pattern_left = 5;
 
-std::vector<Element> pattern;
+vector<Element> pattern;
+string buffer;
 
-int get_pattern_len() {
+int get_pattern_len()
+{
   int len = 0;
   for (size_t i = 0; i < pattern.size(); i++) {
     Element el = pattern[i];
@@ -35,7 +42,8 @@ int get_pattern_len() {
   return len;
 }
 
-int get_element_len(Element el) {
+int get_element_len(Element el)
+{
   switch (el.duration) {
   case D16:
   default:
@@ -47,7 +55,47 @@ int get_element_len(Element el) {
   }
 }
 
-void draw_element(Element el, int &col, int &pos) {
+/*
+    {14, {
+      {1, D8}, {1, D16}, {1, D16}, {1, D16}, {1, D16}, {1, D16}, {1, D16},
+   {1, D8}, {1, D16}, {1, D16}, {1, D16}, {1, D16}, {1, D16}, {1, D16}
+   }},
+*/
+void generate()
+{
+  // char temp[40];
+  buffer.clear();
+  buffer.append("{{");
+  // sprintf(temp, "%d,{", (int)pattern.size());
+  // buffer.append(temp);
+  buffer.append(format("{},{{", static_cast<int>(pattern.size())));
+
+  for (size_t i = 0; i < pattern.size(); i++) {
+    Element el = pattern[i];
+    // sprintf(temp, "{%d,", el.type == Note ? 1 : 0);
+    buffer.append(format("{{{},", el.type == Note ? 1 : 0));
+
+    switch (el.duration) {
+    case D4:
+      buffer.append("D4}");
+      break;
+    case D8:
+      buffer.append("D8}");
+      break;
+    case D16:
+      buffer.append("D16}");
+      break;
+    }
+    if (i < pattern.size() - 1)
+      buffer.append(",");
+  }
+
+  buffer.append("}},");
+  // cout << buffer;
+}
+
+void draw_element(Element el, int &col, int &pos)
+{
   char ch = el.type == Note ? '=' : '.';
   int len = get_element_len(el);
 
@@ -64,7 +112,22 @@ void draw_element(Element el, int &col, int &pos) {
   pos += len;
 }
 
-int main() {
+void generatePattern()
+{
+  generate();
+  move(9, 0); // move to begining of line
+  clrtoeol(); // clear line
+  mvprintw(9, 0, buffer.c_str());
+  refresh();
+
+  fstream fs;
+  fs.open("pattern.txt", std::fstream::out | std::fstream::app);
+  fs << buffer << endl;
+  fs.close();
+}
+
+int main()
+{
 
   initscr();
   raw();                // Line buffering disabled
@@ -85,9 +148,7 @@ int main() {
   mvprintw(0, 0, "-- Pattern Editor --");
   mvprintw(2, 0, " Add Note: 1/4 - q, 1/8 - w, 1/16 - e");
   mvprintw(3, 0, "Add Pause: 1/4 - a, 1/8 - s, 1/16 - d");
-  mvprintw(
-      4, 0,
-      " Commands: z - delete last, r - render, v - clear pattern, x - exit");
+  mvprintw(4, 0, " Commands: z - delete last, r - render, v - clear pattern, x - exit");
   refresh();
 
   int ch;
@@ -119,6 +180,10 @@ int main() {
       break;
     case 'v':
       pattern.clear();
+      break;
+    case 'r':
+      if (pattern.size() > 0)
+        generatePattern();
       break;
     }
 
