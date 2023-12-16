@@ -80,12 +80,14 @@ int main() {
 
   start_color();
   init_pair(1, COLOR_WHITE, COLOR_BLACK);
-  init_pair(2, COLOR_WHITE, COLOR_GREEN);
+  init_pair(2, COLOR_BLACK, COLOR_GREEN);
 
   mvprintw(0, 0, "-- Pattern Editor --");
   mvprintw(2, 0, " Add Note: 1/4 - q, 1/8 - w, 1/16 - e");
   mvprintw(3, 0, "Add Pause: 1/4 - a, 1/8 - s, 1/16 - d");
-  mvprintw(4, 0, " Commands: z - delete last, r - render, x - exit");
+  mvprintw(
+      4, 0,
+      " Commands: z - delete last, r - render, v - clear pattern, x - exit");
   refresh();
 
   int ch;
@@ -115,6 +117,9 @@ int main() {
       if (pattern.size() > 0)
         pattern.pop_back();
       break;
+    case 'v':
+      pattern.clear();
+      break;
     }
 
     // Draw the pattern
@@ -122,7 +127,9 @@ int main() {
     clrtoeol();           // clear line
 
     int pattern_len = get_pattern_len();
+    attron(A_UNDERLINE);
     mvprintw(5, 0, "Pattern length: %2d", pattern_len);
+    attroff(A_UNDERLINE);
 
     if (pattern.size() > 0) {
       int col = 0;
