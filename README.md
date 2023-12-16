@@ -1,4 +1,17 @@
 # Pattern Editor
 
 A simple pattern editor for the Chopper. Uses the ncurses library. 
-Patterns are appended to the pattrn.txt file when generated.  
+Patterns are appended to the pattern.txt file when generated.  
+
+| Key | Command |
+| --- | --- |
+| q | add 1/4 note |
+| w | add 1/8 note |
+| e | add 1/16 note |
+| a | add 1/4 pause |
+| s | add 1/8 pause |
+| d | add 1/16 pause |
+| z | delete last element |
+| r | render pattern |
+| v | clear pattern |
+| x | exit |
