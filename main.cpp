@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <format>
+#include <fstream>
 
 using namespace std;
 
@@ -111,6 +112,20 @@ void draw_element(Element el, int &col, int &pos)
   pos += len;
 }
 
+void generatePattern()
+{
+  generate();
+  move(9, 0); // move to begining of line
+  clrtoeol(); // clear line
+  mvprintw(9, 0, buffer.c_str());
+  refresh();
+
+  fstream fs;
+  fs.open("pattern.txt", std::fstream::out | std::fstream::app);
+  fs << buffer;
+  fs.close();
+}
+
 int main()
 {
 
@@ -167,9 +182,7 @@ int main()
       pattern.clear();
       break;
     case 'r':
-      generate();
-      mvprintw(9, 0, buffer.c_str());
-      refresh();
+      generatePattern();
       break;
     }
 
