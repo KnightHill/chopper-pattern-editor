@@ -2,6 +2,7 @@
 #include <ncurses.h>
 #include <string>
 #include <vector>
+// #include <format>
 
 // g++ -Wall main.cpp -lncurses -o editor
 
@@ -51,9 +52,10 @@ int get_element_len(Element el)
 }
 
 /*
-    {14, {{1, D8}, {1, D16}, {1, D16}, {1, D16}, {1, D16}, {1, D16}, {1, D16},
-   {1, D8}, {1, D16}, {1, D16}, {1, D16}, {1, D16}, {1, D16}, {1, D16}}
-   },
+    {14, {
+      {1, D8}, {1, D16}, {1, D16}, {1, D16}, {1, D16}, {1, D16}, {1, D16},
+   {1, D8}, {1, D16}, {1, D16}, {1, D16}, {1, D16}, {1, D16}, {1, D16}
+   }},
 */
 void generate()
 {
@@ -62,12 +64,29 @@ void generate()
 
   sprintf(temp, "%d,{", (int)pattern.size());
   buffer.append(temp);
+  // buffer << std::format("%d,{", (int)pattern.size());
 
   for (size_t i = 0; i < pattern.size(); i++) {
     Element el = pattern[i];
+    sprintf(temp, "{%d,", el.type == Note ? 1 : 0);
+    buffer.append(temp);
+
+    switch (el.duration) {
+    case D4:
+      buffer.append("D4}");
+      break;
+    case D8:
+      buffer.append("D8}");
+      break;
+    case D16:
+      buffer.append("D16}");
+      break;
+    }
+    if (i < pattern.size() - 1)
+      buffer.append(",");
   }
 
-  buffer.append("},");
+  buffer.append("}},");
 }
 
 void draw_element(Element el, int &col, int &pos)
@@ -142,6 +161,9 @@ int main()
       break;
     case 'v':
       pattern.clear();
+      break;
+    case 'r':
+      generate();
       break;
     }
 
