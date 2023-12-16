@@ -122,7 +122,7 @@ void generatePattern()
 
   fstream fs;
   fs.open("pattern.txt", std::fstream::out | std::fstream::app);
-  fs << buffer;
+  fs << buffer << endl;
   fs.close();
 }
 
@@ -182,7 +182,8 @@ int main()
       pattern.clear();
       break;
     case 'r':
-      generatePattern();
+      if (pattern.size() > 0)
+        generatePattern();
       break;
     }
 
