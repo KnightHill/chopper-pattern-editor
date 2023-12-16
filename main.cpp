@@ -2,9 +2,11 @@
 #include <ncurses.h>
 #include <string>
 #include <vector>
-// #include <format>
+#include <format>
 
-// g++ -Wall main.cpp -lncurses -o editor
+using namespace std;
+
+// g++ -std=c++20 -Wall main.cpp -lncurses -o editor
 
 enum Duration {
   D4, // quarter
@@ -26,7 +28,8 @@ int get_pattern_len();
 const int pattern_top = 7;
 const int pattern_left = 5;
 
-std::vector<Element> pattern;
+vector<Element> pattern;
+string buffer;
 
 int get_pattern_len()
 {
@@ -59,17 +62,17 @@ int get_element_len(Element el)
 */
 void generate()
 {
-  char temp[40];
-  std::string buffer("{");
-
-  sprintf(temp, "%d,{", (int)pattern.size());
-  buffer.append(temp);
-  // buffer << std::format("%d,{", (int)pattern.size());
+  // char temp[40];
+  buffer.clear();
+  buffer.append("{{");
+  // sprintf(temp, "%d,{", (int)pattern.size());
+  // buffer.append(temp);
+  buffer.append(format("{},{{", static_cast<int>(pattern.size())));
 
   for (size_t i = 0; i < pattern.size(); i++) {
     Element el = pattern[i];
-    sprintf(temp, "{%d,", el.type == Note ? 1 : 0);
-    buffer.append(temp);
+    // sprintf(temp, "{%d,", el.type == Note ? 1 : 0);
+    buffer.append(format("{{{},", el.type == Note ? 1 : 0));
 
     switch (el.duration) {
     case D4:
@@ -87,6 +90,7 @@ void generate()
   }
 
   buffer.append("}},");
+  // cout << buffer;
 }
 
 void draw_element(Element el, int &col, int &pos)
@@ -164,6 +168,8 @@ int main()
       break;
     case 'r':
       generate();
+      mvprintw(9, 0, buffer.c_str());
+      refresh();
       break;
     }
 
