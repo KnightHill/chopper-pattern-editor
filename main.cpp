@@ -54,9 +54,9 @@ int main() {
   curs_set(0);          // Hide cursor
 
   mvprintw(0, 0, "-- Pattern Editor --");
-  mvprintw(2, 0, "     Note: 1/4 - q, 1/8 - w, 1/16 - e");
-  mvprintw(3, 0, "    Pause: 1/4 - a, 1/8 - s, 1/16 - d");
-  mvprintw(5, 0, " Commands: z - delete last, r - render, x - exit");
+  mvprintw(2, 0, " Add Note: 1/4 - q, 1/8 - w, 1/16 - e");
+  mvprintw(3, 0, "Add Pause: 1/4 - a, 1/8 - s, 1/16 - d");
+  mvprintw(4, 0, " Commands: z - delete last, r - render, x - exit");
   refresh();
 
   int ch;
