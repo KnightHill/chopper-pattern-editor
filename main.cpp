@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <ncurses.h>
 #include <vector>
 
@@ -46,16 +47,21 @@ int get_element_len(Element el) {
   }
 }
 
-void draw_element(Element el, int &col) {
+void draw_element(Element el, int &col, int &pos) {
   char ch = el.type == Note ? '=' : '.';
   int len = get_element_len(el);
 
   for (int j = 0; j < len; j++) {
+    int beat = (pos + j) % 8;
+    int pair_index = beat < 4 ? 1 : 2;
+    attron(COLOR_PAIR(pair_index));
     mvaddch(pattern_top, pattern_left + col + j, ch);
+    attroff(COLOR_PAIR(pair_index));
   }
 
   mvaddch(pattern_top, pattern_left + col + len, '|');
   col += len + 1;
+  pos += len;
 }
 
 int main() {
@@ -66,10 +72,22 @@ int main() {
   noecho();             // Don't echo() while we do getch
   curs_set(0);          // Hide cursor
 
+  if (has_colors() == FALSE) {
+    endwin();
+    printf("Your terminal does not support color\n");
+    exit(1);
+  }
+
+  start_color();
+  init_pair(1, COLOR_WHITE, COLOR_BLACK);
+  init_pair(2, COLOR_BLACK, COLOR_GREEN);
+
   mvprintw(0, 0, "-- Pattern Editor --");
   mvprintw(2, 0, " Add Note: 1/4 - q, 1/8 - w, 1/16 - e");
   mvprintw(3, 0, "Add Pause: 1/4 - a, 1/8 - s, 1/16 - d");
-  mvprintw(4, 0, " Commands: z - delete last, r - render, x - exit");
+  mvprintw(
+      4, 0,
+      " Commands: z - delete last, r - render, v - clear pattern, x - exit");
   refresh();
 
   int ch;
@@ -99,6 +117,9 @@ int main() {
       if (pattern.size() > 0)
         pattern.pop_back();
       break;
+    case 'v':
+      pattern.clear();
+      break;
     }
 
     // Draw the pattern
@@ -106,15 +127,19 @@ int main() {
     clrtoeol();           // clear line
 
     int pattern_len = get_pattern_len();
+    attron(A_UNDERLINE);
     mvprintw(5, 0, "Pattern length: %2d", pattern_len);
+    attroff(A_UNDERLINE);
 
     if (pattern.size() > 0) {
       int col = 0;
+      int pos = 0;
+
       mvaddch(pattern_top, pattern_left - 1, '|');
 
       for (size_t i = 0; i < pattern.size(); i++) {
         Element e = pattern[i];
-        draw_element(e, col);
+        draw_element(e, col, pos);
       }
     }
     refresh();
