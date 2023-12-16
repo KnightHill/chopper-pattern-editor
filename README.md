@@ -1,6 +1,6 @@
 # Pattern Editor
 
-A simple pattern editor for the Chopper. Uses the ncurses library. 
+A simple pattern editor for the [Daisy Chopper](https://github.com/KnightHill/daisy-chopper). Uses the ncurses library. 
 Patterns are appended to the pattern.txt file when generated.  
 
 | Key | Command |
