@@ -1,9 +1,11 @@
 #include <cstdlib>
-#include <ncurses.h>
 #include <string>
 #include <vector>
 #include <format>
 #include <fstream>
+#include <ncurses.h>
+
+// http://ld2009.scusa.lsu.edu/php/ref.ncurses.html
 
 using namespace std;
 
@@ -90,7 +92,7 @@ void generate()
 
 void draw_element(Element el, int &col, int &pos)
 {
-  char ch = el.type == Note ? '=' : '.';
+  int ch = el.type == Note ? '=' : '.';
   int len = get_element_len(el);
 
   for (int j = 0; j < len; j++) {
@@ -109,9 +111,9 @@ void draw_element(Element el, int &col, int &pos)
 void generatePattern()
 {
   generate();
-  move(9, 0); // move to begining of line
+  move(9, 5); // move to begining of line
   clrtoeol(); // clear line
-  mvprintw(9, 0, buffer.c_str());
+  mvprintw(9, 5, buffer.c_str());
   refresh();
 
   fstream fs;
@@ -139,10 +141,11 @@ int main()
   init_pair(1, COLOR_WHITE, COLOR_BLACK);
   init_pair(2, COLOR_BLACK, COLOR_GREEN);
 
-  mvprintw(0, 0, "-- Pattern Editor --");
-  mvprintw(2, 0, " Add Note: 1/4 - q, 1/8 - w, 1/16 - e");
-  mvprintw(3, 0, "Add Pause: 1/4 - a, 1/8 - s, 1/16 - d");
-  mvprintw(4, 0, " Commands: z - delete last, r - render, v - clear pattern, x - exit");
+  border(0, 0, 0, 0, 0, 0, 0, 0);
+  mvprintw(0, 2, " Pattern Editor ");
+  mvprintw(2, 2, " Add Note: 1/4 - q, 1/8 - w, 1/16 - e");
+  mvprintw(3, 2, "Add Pause: 1/4 - a, 1/8 - s, 1/16 - d");
+  mvprintw(4, 2, " Commands: z - delete last, r - render, v - clear pattern, x - exit");
   refresh();
 
   int ch;
@@ -182,12 +185,12 @@ int main()
     }
 
     // Draw the pattern
-    move(pattern_top, 0); // move to begining of line
+    move(pattern_top, 4); // move to begining of line
     clrtoeol();           // clear line
 
     int pattern_len = get_pattern_len();
     attron(A_UNDERLINE);
-    mvprintw(5, 0, "Pattern length: %2d", pattern_len);
+    mvprintw(5, 2, "Pattern length: %2d", pattern_len);
     attroff(A_UNDERLINE);
 
     if (pattern.size() > 0) {
