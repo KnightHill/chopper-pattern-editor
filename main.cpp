@@ -33,6 +33,22 @@ const int pattern_left = 5;
 vector<Element> pattern;
 string buffer;
 
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+
+void clr_line()
+{
+  int col, row;
+  int cols, rows;
+
+  getyx(stdscr, row, col);
+  getmaxyx(stdscr, rows, cols);
+
+  move(row, 1);
+  for (int c = 0; c < cols - 2; c++) {
+    addch(' ');
+  }
+}
+
 int get_pattern_len()
 {
   int len = 0;
@@ -112,7 +128,7 @@ void generatePattern()
 {
   generate();
   move(9, 5); // move to begining of line
-  clrtoeol(); // clear line
+  clr_line();
   mvprintw(9, 5, buffer.c_str());
   refresh();
 
@@ -124,7 +140,6 @@ void generatePattern()
 
 int main()
 {
-
   initscr();
   raw();                // Line buffering disabled
   keypad(stdscr, TRUE); // We get F1, F2 etc..
@@ -186,7 +201,7 @@ int main()
 
     // Draw the pattern
     move(pattern_top, 4); // move to begining of line
-    clrtoeol();           // clear line
+    clr_line();
 
     int pattern_len = get_pattern_len();
     attron(A_UNDERLINE);
