@@ -34,9 +34,6 @@ const int PATTERN_LEFT = 5;
 const int CODE_TOP = 11;
 const int CODE_LEFT = 5;
 
-// screen dimentions
-int SCREEN_ROWS, SCREEN_COLS;
-
 // toaster
 WINDOW *popup_win;
 
@@ -48,7 +45,7 @@ void clear_line()
   int col, row;
   getyx(stdscr, row, col);
   move(row, 1);
-  for (int c = 0; c < SCREEN_COLS - 2; c++) {
+  for (int c = 0; c < COLS - 2; c++) {
     addch(' ');
   }
 }
@@ -183,11 +180,11 @@ void toaster(const char *message)
 int main()
 {
   initscr();
-  raw();                                      // Line buffering disabled
-  keypad(stdscr, TRUE);                       // We get F1, F2 etc..
-  noecho();                                   // Don't echo() while we do getch
-  curs_set(0);                                // Hide cursor
-  getmaxyx(stdscr, SCREEN_ROWS, SCREEN_COLS); // get screen dimentions
+  raw();                // Line buffering disabled
+  keypad(stdscr, TRUE); // We get F1, F2 etc..
+  noecho();             // Don't echo() while we do getch
+  curs_set(0);          // Hide cursor
+                        //  getmaxyx(stdscr, ROWS, LINES); // get screen dimentions
 
   if (has_colors() == FALSE) {
     endwin();
@@ -202,8 +199,8 @@ int main()
   mvprintw(2, 2, "      Add Note: 1/4 - q, 1/8 - w, 1/16 - e");
   mvprintw(3, 2, "     Add Pause: 1/4 - a, 1/8 - s, 1/16 - d");
   mvprintw(4, 2, "      Commands: z - delete last, r - render, v - clear pattern, x - exit");
-  mvhline(PATTERN_TOP - 1, 1, ACS_HLINE, SCREEN_COLS - 2);
-  mvhline(PATTERN_TOP + 1, 1, ACS_HLINE, SCREEN_COLS - 2);
+  mvhline(PATTERN_TOP - 1, 1, ACS_HLINE, COLS - 2);
+  mvhline(PATTERN_TOP + 1, 1, ACS_HLINE, COLS - 2);
   refresh();
 
   bool exit;
