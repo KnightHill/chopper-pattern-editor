@@ -13,6 +13,10 @@ using namespace std;
 
 Pattern pattern;
 
+// symbols
+const int NOTE_SYMBOL = '=';
+const int PAUSE_SYMBOL = '.';
+
 // custom colors
 const int COLOR_BRIGHT_WHITE = 8;
 const int COLOR_BRIGHT_RED = 9;
@@ -46,7 +50,7 @@ void clear_line()
 
 void draw_element(Element el, int &col, int &pos)
 {
-  int ch = el.type == Note ? '=' : '.';
+  int ch = el.type == Note ? NOTE_SYMBOL : PAUSE_SYMBOL;
   int len = pattern.GetElementLen(el);
 
   for (int j = 0; j < len; j++) {
@@ -159,7 +163,6 @@ int main()
 
   init_pair(ODD_COLOR_PAIR, COLOR_BRIGHT_WHITE, COLOR_BLACK);
   init_pair(EVEN_COLOR_PAIR, COLOR_BRIGHT_GREEN, COLOR_BLACK);
-  // init_pair(EVEN_COLOR_PAIR, COLOR_BLACK, COLOR_WHITE);
 
   border(0, 0, 0, 0, 0, 0, 0, 0);
   mvprintw(0, 2, " Pattern Editor ");
