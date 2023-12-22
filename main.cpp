@@ -15,7 +15,7 @@ Pattern pattern;
 
 // symbols
 const int NOTE_SYMBOL = '=';
-const int PAUSE_SYMBOL = '.';
+const int PAUSE_SYMBOL = '-';
 
 // custom colors
 const int COLOR_BRIGHT_WHITE = 8;
@@ -27,23 +27,20 @@ const int ODD_COLOR_PAIR = 1;
 const int EVEN_COLOR_PAIR = 2;
 
 // pattern display coordinates
-const int pattern_top = 7;
-const int pattern_left = 5;
-const int code_top = 9;
-const int code_left = 5;
+const int PATTERN_TOP = 8;
+const int PATTERN_LEFT = 5;
+const int CODE_TOP = 11;
+const int CODE_LEFT = 5;
 
-#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+// screen dimentions
+int SCREEN_ROWS, SCREEN_COLS;
 
 void clear_line()
 {
   int col, row;
-  int cols, rows;
-
   getyx(stdscr, row, col);
-  getmaxyx(stdscr, rows, cols);
-
   move(row, 1);
-  for (int c = 0; c < cols - 2; c++) {
+  for (int c = 0; c < SCREEN_COLS - 2; c++) {
     addch(' ');
   }
 }
@@ -57,11 +54,11 @@ void draw_element(Element el, int &col, int &pos)
     int beat = (pos + j) % 8;
     int pair_index = beat < 4 ? ODD_COLOR_PAIR : EVEN_COLOR_PAIR;
     attron(COLOR_PAIR(pair_index));
-    mvaddch(pattern_top, pattern_left + col + j, ch);
+    mvaddch(PATTERN_TOP, PATTERN_LEFT + col + j, ch);
     attroff(COLOR_PAIR(pair_index));
   }
 
-  mvaddch(pattern_top, pattern_left + col + len, '|');
+  mvaddch(PATTERN_TOP, PATTERN_LEFT + col + len, '|');
   col += len + 1;
   pos += len;
 }
@@ -70,9 +67,9 @@ void generate_pattern()
 {
   if (pattern.Size() > 0) {
     auto buffer = pattern.Generate();
-    move(code_top, code_left); // move to begining of line
+    move(CODE_TOP, CODE_LEFT); // move to begining of line
     clear_line();
-    mvprintw(code_top, code_left, buffer.c_str());
+    mvprintw(CODE_TOP, CODE_LEFT, buffer.c_str());
     refresh();
   }
 }
@@ -121,7 +118,7 @@ bool process_keys()
 void draw_pattern()
 {
   // Draw the pattern
-  move(pattern_top, 4); // move to begining of line
+  move(PATTERN_TOP, 4); // move to begining of line
   clear_line();
 
   // attron(A_UNDERLINE);
@@ -132,7 +129,7 @@ void draw_pattern()
     int col = 0;
     int pos = 0;
 
-    mvaddch(pattern_top, pattern_left - 1, '|');
+    mvaddch(PATTERN_TOP, PATTERN_LEFT - 1, '|');
 
     for (size_t i = 0; i < pattern.Size(); i++) {
       Element e = pattern.Get(i);
@@ -142,20 +139,8 @@ void draw_pattern()
   refresh();
 }
 
-int main()
+void init_colors()
 {
-  initscr();
-  raw();                // Line buffering disabled
-  keypad(stdscr, TRUE); // We get F1, F2 etc..
-  noecho();             // Don't echo() while we do getch
-  curs_set(0);          // Hide cursor
-
-  if (has_colors() == FALSE) {
-    endwin();
-    printf("Your terminal does not support color\n");
-    exit(1);
-  }
-
   start_color();
   init_color(COLOR_BRIGHT_WHITE, 1000, 1000, 1000);
   init_color(COLOR_BRIGHT_RED, 1000, 0, 0);
@@ -163,12 +148,32 @@ int main()
 
   init_pair(ODD_COLOR_PAIR, COLOR_BRIGHT_WHITE, COLOR_BLACK);
   init_pair(EVEN_COLOR_PAIR, COLOR_BRIGHT_GREEN, COLOR_BLACK);
+}
+
+int main()
+{
+  initscr();
+  raw();                                      // Line buffering disabled
+  keypad(stdscr, TRUE);                       // We get F1, F2 etc..
+  noecho();                                   // Don't echo() while we do getch
+  curs_set(0);                                // Hide cursor
+  getmaxyx(stdscr, SCREEN_ROWS, SCREEN_COLS); // get screen dimentions
+
+  if (has_colors() == FALSE) {
+    endwin();
+    printf("Your terminal does not support color\n");
+    exit(1);
+  }
+
+  init_colors();
 
   border(0, 0, 0, 0, 0, 0, 0, 0);
   mvprintw(0, 2, " Pattern Editor ");
-  mvprintw(2, 2, " Add Note: 1/4 - q, 1/8 - w, 1/16 - e");
-  mvprintw(3, 2, "Add Pause: 1/4 - a, 1/8 - s, 1/16 - d");
-  mvprintw(4, 2, " Commands: z - delete last, r - render, v - clear pattern, x - exit");
+  mvprintw(2, 2, "      Add Note: 1/4 - q, 1/8 - w, 1/16 - e");
+  mvprintw(3, 2, "     Add Pause: 1/4 - a, 1/8 - s, 1/16 - d");
+  mvprintw(4, 2, "      Commands: z - delete last, r - render, v - clear pattern, x - exit");
+  mvhline(PATTERN_TOP - 1, 1, ACS_HLINE, SCREEN_COLS - 2);
+  mvhline(PATTERN_TOP + 1, 1, ACS_HLINE, SCREEN_COLS - 2);
   refresh();
 
   bool exit;
