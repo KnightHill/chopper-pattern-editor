@@ -13,13 +13,16 @@ using namespace std;
 
 Pattern pattern;
 
+const int ODD_COLOR_PAIR = 1;
+const int EVEN_COLOR_PAIR = 2;
+
 // pattern display coordinates
 const int pattern_top = 7;
 const int pattern_left = 5;
 
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 
-void clr_line()
+void clear_line()
 {
   int col, row;
   int cols, rows;
@@ -40,7 +43,7 @@ void draw_element(Element el, int &col, int &pos)
 
   for (int j = 0; j < len; j++) {
     int beat = (pos + j) % 8;
-    int pair_index = beat < 4 ? 1 : 2;
+    int pair_index = beat < 4 ? ODD_COLOR_PAIR : EVEN_COLOR_PAIR;
     attron(COLOR_PAIR(pair_index));
     mvaddch(pattern_top, pattern_left + col + j, ch);
     attroff(COLOR_PAIR(pair_index));
@@ -51,12 +54,79 @@ void draw_element(Element el, int &col, int &pos)
   pos += len;
 }
 
-void generatePattern()
+void generate_pattern()
 {
-  auto buffer = pattern.Generate();
-  move(9, 5); // move to begining of line
-  clr_line();
-  mvprintw(9, 5, buffer.c_str());
+  if (pattern.Size() > 0) {
+    auto buffer = pattern.Generate();
+    move(9, 5); // move to begining of line
+    clear_line();
+    mvprintw(9, 5, buffer.c_str());
+    refresh();
+  }
+}
+
+bool process_keys()
+{
+  bool exit = false;
+
+  int ch = getch();
+  switch (ch) {
+  case 'q':
+    pattern.Add({Note, D4});
+    break;
+  case 'w':
+    pattern.Add({Note, D8});
+    break;
+  case 'e':
+    pattern.Add({Note, D16});
+    break;
+  case 'a':
+    pattern.Add({Pause, D4});
+    break;
+  case 's':
+    pattern.Add({Pause, D8});
+    break;
+  case 'd':
+    pattern.Add({Pause, D16});
+    break;
+  case 'z':
+    pattern.DeleteLast();
+    break;
+  case 'v':
+    pattern.Clear();
+    break;
+  case 'r':
+    generate_pattern();
+    break;
+  case 'x':
+    exit = true;
+    break;
+  }
+
+  return exit;
+}
+
+void draw_pattern()
+{
+  // Draw the pattern
+  move(pattern_top, 4); // move to begining of line
+  clear_line();
+
+  // attron(A_UNDERLINE);
+  mvprintw(5, 2, "Pattern length: %2d", pattern.GetPatternLen());
+  // attroff(A_UNDERLINE);
+
+  if (pattern.Size() > 0) {
+    int col = 0;
+    int pos = 0;
+
+    mvaddch(pattern_top, pattern_left - 1, '|');
+
+    for (size_t i = 0; i < pattern.Size(); i++) {
+      Element e = pattern.Get(i);
+      draw_element(e, col, pos);
+    }
+  }
   refresh();
 }
 
@@ -75,8 +145,8 @@ int main()
   }
 
   start_color();
-  init_pair(1, COLOR_WHITE, COLOR_BLACK);
-  init_pair(2, COLOR_BLACK, COLOR_GREEN);
+  init_pair(ODD_COLOR_PAIR, COLOR_WHITE, COLOR_BLACK);
+  init_pair(EVEN_COLOR_PAIR, COLOR_BLACK, COLOR_GREEN);
 
   border(0, 0, 0, 0, 0, 0, 0, 0);
   mvprintw(0, 2, " Pattern Editor ");
@@ -85,63 +155,12 @@ int main()
   mvprintw(4, 2, " Commands: z - delete last, r - render, v - clear pattern, x - exit");
   refresh();
 
-  int ch;
+  bool exit;
 
   do {
-    ch = getch();
-    switch (ch) {
-    case 'q':
-      pattern.Add({Note, D4});
-      break;
-    case 'w':
-      pattern.Add({Note, D8});
-      break;
-    case 'e':
-      pattern.Add({Note, D16});
-      break;
-    case 'a':
-      pattern.Add({Pause, D4});
-      break;
-    case 's':
-      pattern.Add({Pause, D8});
-      break;
-    case 'd':
-      pattern.Add({Pause, D16});
-      break;
-    case 'z':
-      pattern.DeleteLast();
-      break;
-    case 'v':
-      pattern.Clear();
-      break;
-    case 'r':
-      if (pattern.Size() > 0)
-        generatePattern();
-      break;
-    }
-
-    // Draw the pattern
-    move(pattern_top, 4); // move to begining of line
-    clr_line();
-
-    attron(A_UNDERLINE);
-    mvprintw(5, 2, "Pattern length: %2d", pattern.GetPatternLen());
-    attroff(A_UNDERLINE);
-
-    if (pattern.Size() > 0) {
-      int col = 0;
-      int pos = 0;
-
-      mvaddch(pattern_top, pattern_left - 1, '|');
-
-      for (size_t i = 0; i < pattern.Size(); i++) {
-        Element e = pattern.Get(i);
-        draw_element(e, col, pos);
-      }
-    }
-    refresh();
-
-  } while (ch != 'x');
+    exit = process_keys();
+    draw_pattern();
+  } while (!exit);
 
   endwin();
 
