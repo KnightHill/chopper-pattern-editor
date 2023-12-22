@@ -19,6 +19,8 @@ const int EVEN_COLOR_PAIR = 2;
 // pattern display coordinates
 const int pattern_top = 7;
 const int pattern_left = 5;
+const int code_top = 9;
+const int code_left = 5;
 
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 
@@ -58,9 +60,9 @@ void generate_pattern()
 {
   if (pattern.Size() > 0) {
     auto buffer = pattern.Generate();
-    move(9, 5); // move to begining of line
+    move(code_top, code_left); // move to begining of line
     clear_line();
-    mvprintw(9, 5, buffer.c_str());
+    mvprintw(code_top, code_left, buffer.c_str());
     refresh();
   }
 }
