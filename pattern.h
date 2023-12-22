@@ -33,6 +33,7 @@ public:
   int GetElementLen(Element el);
 
   std::string &Generate();
+  void SaveCode();
 
 private:
   std::vector<Element> m_pattern;

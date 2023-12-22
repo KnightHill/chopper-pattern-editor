@@ -3,8 +3,7 @@
 #include <vector>
 #include <format>
 #include <fstream>
-#include <ncurses.h>
-
+// #include <ncurses.h>
 #include "pattern.h"
 
 using namespace std;
@@ -65,4 +64,13 @@ string &Pattern::Generate()
 
   m_buffer.append("}},");
   return m_buffer;
+}
+
+void Pattern::SaveCode()
+{
+  auto buffer = Generate();
+  fstream fs;
+  fs.open("pattern.txt", std::fstream::out | std::fstream::app);
+  fs << buffer << endl;
+  fs.close();
 }
