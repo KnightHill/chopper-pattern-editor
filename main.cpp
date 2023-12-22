@@ -1,41 +1,30 @@
 #include <cstdlib>
+
 #include <string>
 #include <vector>
 #include <format>
 #include <fstream>
 #include <ncurses.h>
+#include "pattern.h"
 
 // http://ld2009.scusa.lsu.edu/php/ref.ncurses.html
 
 using namespace std;
 
-enum Duration {
-  D4, // quarter
-  D8, // eigth
-  D16 // sixteenth
-};
+Pattern pattern;
 
-enum ElementType { Note, Pause };
+const int ODD_COLOR_PAIR = 1;
+const int EVEN_COLOR_PAIR = 2;
 
-struct Element {
-  ElementType type;
-  Duration duration;
-};
-
-// prototypes
-int get_element_len(Element el);
-int get_pattern_len();
-
-// pattern displa coordinates
+// pattern display coordinates
 const int pattern_top = 7;
 const int pattern_left = 5;
-
-vector<Element> pattern;
-string buffer;
+const int code_top = 9;
+const int code_left = 5;
 
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 
-void clr_line()
+void clear_line()
 {
   int col, row;
   int cols, rows;
@@ -49,71 +38,14 @@ void clr_line()
   }
 }
 
-int get_pattern_len()
-{
-  int len = 0;
-  for (size_t i = 0; i < pattern.size(); i++) {
-    Element el = pattern[i];
-    len += get_element_len(el);
-  }
-  return len;
-}
-
-int get_element_len(Element el)
-{
-  switch (el.duration) {
-  case D16:
-  default:
-    return 1;
-  case D8:
-    return 2;
-  case D4:
-    return 4;
-  }
-}
-
-/*
-    {14, {
-      {1, D8}, {1, D16}, {1, D16}, {1, D16}, {1, D16}, {1, D16}, {1, D16},
-   {1, D8}, {1, D16}, {1, D16}, {1, D16}, {1, D16}, {1, D16}, {1, D16}
-   }},
-*/
-void generate()
-{
-  buffer.clear();
-  buffer.append("{");
-  buffer.append(format("{},{{", static_cast<int>(pattern.size())));
-
-  for (size_t i = 0; i < pattern.size(); i++) {
-    Element el = pattern[i];
-    buffer.append(format("{{{},", el.type == Note ? 1 : 0));
-
-    switch (el.duration) {
-    case D4:
-      buffer.append("D4}");
-      break;
-    case D8:
-      buffer.append("D8}");
-      break;
-    case D16:
-      buffer.append("D16}");
-      break;
-    }
-    if (i < pattern.size() - 1)
-      buffer.append(",");
-  }
-
-  buffer.append("}},");
-}
-
 void draw_element(Element el, int &col, int &pos)
 {
   int ch = el.type == Note ? '=' : '.';
-  int len = get_element_len(el);
+  int len = pattern.GetElementLen(el);
 
   for (int j = 0; j < len; j++) {
     int beat = (pos + j) % 8;
-    int pair_index = beat < 4 ? 1 : 2;
+    int pair_index = beat < 4 ? ODD_COLOR_PAIR : EVEN_COLOR_PAIR;
     attron(COLOR_PAIR(pair_index));
     mvaddch(pattern_top, pattern_left + col + j, ch);
     attroff(COLOR_PAIR(pair_index));
@@ -124,18 +56,80 @@ void draw_element(Element el, int &col, int &pos)
   pos += len;
 }
 
-void generatePattern()
+void generate_pattern()
 {
-  generate();
-  move(9, 5); // move to begining of line
-  clr_line();
-  mvprintw(9, 5, buffer.c_str());
-  refresh();
+  if (pattern.Size() > 0) {
+    auto buffer = pattern.Generate();
+    move(code_top, code_left); // move to begining of line
+    clear_line();
+    mvprintw(code_top, code_left, buffer.c_str());
+    refresh();
+  }
+}
 
-  fstream fs;
-  fs.open("pattern.txt", std::fstream::out | std::fstream::app);
-  fs << buffer << endl;
-  fs.close();
+bool process_keys()
+{
+  bool exit = false;
+
+  int ch = getch();
+  switch (ch) {
+  case 'q':
+    pattern.Add({Note, D4});
+    break;
+  case 'w':
+    pattern.Add({Note, D8});
+    break;
+  case 'e':
+    pattern.Add({Note, D16});
+    break;
+  case 'a':
+    pattern.Add({Pause, D4});
+    break;
+  case 's':
+    pattern.Add({Pause, D8});
+    break;
+  case 'd':
+    pattern.Add({Pause, D16});
+    break;
+  case 'z':
+    pattern.DeleteLast();
+    break;
+  case 'v':
+    pattern.Clear();
+    break;
+  case 'r':
+    generate_pattern();
+    break;
+  case 'x':
+    exit = true;
+    break;
+  }
+
+  return exit;
+}
+
+void draw_pattern()
+{
+  // Draw the pattern
+  move(pattern_top, 4); // move to begining of line
+  clear_line();
+
+  // attron(A_UNDERLINE);
+  mvprintw(5, 2, "Pattern length: %2d", pattern.GetPatternLen());
+  // attroff(A_UNDERLINE);
+
+  if (pattern.Size() > 0) {
+    int col = 0;
+    int pos = 0;
+
+    mvaddch(pattern_top, pattern_left - 1, '|');
+
+    for (size_t i = 0; i < pattern.Size(); i++) {
+      Element e = pattern.Get(i);
+      draw_element(e, col, pos);
+    }
+  }
+  refresh();
 }
 
 int main()
@@ -153,8 +147,8 @@ int main()
   }
 
   start_color();
-  init_pair(1, COLOR_WHITE, COLOR_BLACK);
-  init_pair(2, COLOR_BLACK, COLOR_GREEN);
+  init_pair(ODD_COLOR_PAIR, COLOR_WHITE, COLOR_BLACK);
+  init_pair(EVEN_COLOR_PAIR, COLOR_BLACK, COLOR_GREEN);
 
   border(0, 0, 0, 0, 0, 0, 0, 0);
   mvprintw(0, 2, " Pattern Editor ");
@@ -163,65 +157,12 @@ int main()
   mvprintw(4, 2, " Commands: z - delete last, r - render, v - clear pattern, x - exit");
   refresh();
 
-  int ch;
+  bool exit;
 
   do {
-    ch = getch();
-    switch (ch) {
-    case 'q':
-      pattern.push_back({Note, D4});
-      break;
-    case 'w':
-      pattern.push_back({Note, D8});
-      break;
-    case 'e':
-      pattern.push_back({Note, D16});
-      break;
-    case 'a':
-      pattern.push_back({Pause, D4});
-      break;
-    case 's':
-      pattern.push_back({Pause, D8});
-      break;
-    case 'd':
-      pattern.push_back({Pause, D16});
-      break;
-    case 'z':
-      if (pattern.size() > 0)
-        pattern.pop_back();
-      break;
-    case 'v':
-      pattern.clear();
-      break;
-    case 'r':
-      if (pattern.size() > 0)
-        generatePattern();
-      break;
-    }
-
-    // Draw the pattern
-    move(pattern_top, 4); // move to begining of line
-    clr_line();
-
-    int pattern_len = get_pattern_len();
-    attron(A_UNDERLINE);
-    mvprintw(5, 2, "Pattern length: %2d", pattern_len);
-    attroff(A_UNDERLINE);
-
-    if (pattern.size() > 0) {
-      int col = 0;
-      int pos = 0;
-
-      mvaddch(pattern_top, pattern_left - 1, '|');
-
-      for (size_t i = 0; i < pattern.size(); i++) {
-        Element e = pattern[i];
-        draw_element(e, col, pos);
-      }
-    }
-    refresh();
-
-  } while (ch != 'x');
+    exit = process_keys();
+    draw_pattern();
+  } while (!exit);
 
   endwin();
 
