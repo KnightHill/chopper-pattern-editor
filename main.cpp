@@ -1,9 +1,9 @@
 #include <cstdlib>
 
-#include <string>
 #include <vector>
 #include <format>
-#include <fstream>
+#include <cstring>
+
 #include <ncurses.h>
 #include "pattern.h"
 
@@ -25,6 +25,8 @@ const int COLOR_BRIGHT_GREEN = 10;
 // color pairs
 const int ODD_COLOR_PAIR = 1;
 const int EVEN_COLOR_PAIR = 2;
+const int POPUP_COLOR_PAIR = 3;
+const int MAIN_COLOR_PAIR = 4;
 
 // pattern display coordinates
 const int PATTERN_TOP = 8;
@@ -34,6 +36,12 @@ const int CODE_LEFT = 5;
 
 // screen dimentions
 int SCREEN_ROWS, SCREEN_COLS;
+
+// toaster
+WINDOW *popup_win;
+
+// prototypes
+void toaster(const char *message);
 
 void clear_line()
 {
@@ -71,6 +79,7 @@ void generate_pattern()
     clear_line();
     mvprintw(CODE_TOP, CODE_LEFT, buffer.c_str());
     refresh();
+    toaster("File Saved");
   }
 }
 
@@ -121,9 +130,7 @@ void draw_pattern()
   move(PATTERN_TOP, 4); // move to begining of line
   clear_line();
 
-  // attron(A_UNDERLINE);
   mvprintw(5, 2, "Pattern length: %2d", pattern.GetPatternLen());
-  // attroff(A_UNDERLINE);
 
   if (pattern.Size() > 0) {
     int col = 0;
@@ -148,6 +155,29 @@ void init_colors()
 
   init_pair(ODD_COLOR_PAIR, COLOR_BRIGHT_WHITE, COLOR_BLACK);
   init_pair(EVEN_COLOR_PAIR, COLOR_BRIGHT_GREEN, COLOR_BLACK);
+  init_pair(POPUP_COLOR_PAIR, COLOR_BRIGHT_WHITE, COLOR_GREEN);
+  init_pair(MAIN_COLOR_PAIR, COLOR_WHITE, COLOR_BLACK);
+}
+
+void toaster(const char *message)
+{
+  int height = 3;
+  int width = 40;
+  int starty = (LINES - height) / 2; /* Calculating for a center placement */
+  int startx = (COLS - width) / 2;   /* of the window		*/
+
+  popup_win = newwin(height, width, starty, startx);
+  wbkgd(popup_win, COLOR_PAIR(POPUP_COLOR_PAIR));
+  box(popup_win, 0, 0);
+  int m_x = (width - strlen(message)) / 2;
+  mvwprintw(popup_win, 1, m_x, message);
+
+  wrefresh(popup_win);
+  napms(2000);
+  wbkgd(popup_win, COLOR_PAIR(MAIN_COLOR_PAIR));
+  wclear(popup_win);
+  wrefresh(popup_win);
+  delwin(popup_win);
 }
 
 int main()
