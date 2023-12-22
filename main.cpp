@@ -13,6 +13,12 @@ using namespace std;
 
 Pattern pattern;
 
+// custom colors
+const int COLOR_BRIGHT_WHITE = 8;
+const int COLOR_BRIGHT_RED = 9;
+const int COLOR_BRIGHT_GREEN = 10;
+
+// color pairs
 const int ODD_COLOR_PAIR = 1;
 const int EVEN_COLOR_PAIR = 2;
 
@@ -147,8 +153,13 @@ int main()
   }
 
   start_color();
-  init_pair(ODD_COLOR_PAIR, COLOR_WHITE, COLOR_BLACK);
-  init_pair(EVEN_COLOR_PAIR, COLOR_BLACK, COLOR_GREEN);
+  init_color(COLOR_BRIGHT_WHITE, 1000, 1000, 1000);
+  init_color(COLOR_BRIGHT_RED, 1000, 0, 0);
+  init_color(COLOR_BRIGHT_GREEN, 0, 1000, 0);
+
+  init_pair(ODD_COLOR_PAIR, COLOR_BRIGHT_WHITE, COLOR_BLACK);
+  init_pair(EVEN_COLOR_PAIR, COLOR_BRIGHT_GREEN, COLOR_BLACK);
+  // init_pair(EVEN_COLOR_PAIR, COLOR_BLACK, COLOR_WHITE);
 
   border(0, 0, 0, 0, 0, 0, 0, 0);
   mvprintw(0, 2, " Pattern Editor ");
