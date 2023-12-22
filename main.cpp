@@ -37,9 +37,11 @@ const int CODE_LEFT = 5;
 // screen dimentions
 int SCREEN_ROWS, SCREEN_COLS;
 
+// toaster
+WINDOW *popup_win;
+
 // prototypes
-void show_toaster(const char *message);
-void close_toaster();
+void toaster(const char *message);
 
 void clear_line()
 {
@@ -77,6 +79,7 @@ void generate_pattern()
     clear_line();
     mvprintw(CODE_TOP, CODE_LEFT, buffer.c_str());
     refresh();
+    toaster("File Saved");
   }
 }
 
@@ -112,12 +115,6 @@ bool process_keys()
     break;
   case 'r':
     generate_pattern();
-    break;
-  case '1':
-    show_toaster("File Saved");
-    break;
-  case '2':
-    close_toaster();
     break;
   case 'x':
     exit = true;
@@ -162,14 +159,8 @@ void init_colors()
   init_pair(MAIN_COLOR_PAIR, COLOR_WHITE, COLOR_BLACK);
 }
 
-WINDOW *popup_win;
-bool popup_active = false;
-
-void show_toaster(const char *message)
+void toaster(const char *message)
 {
-  if (popup_active)
-    return;
-
   int height = 3;
   int width = 40;
   int starty = (LINES - height) / 2; /* Calculating for a center placement */
@@ -182,19 +173,11 @@ void show_toaster(const char *message)
   mvwprintw(popup_win, 1, m_x, message);
 
   wrefresh(popup_win);
-
-  popup_active = true;
-}
-
-void close_toaster()
-{
-  if (!popup_active)
-    return;
+  napms(2000);
   wbkgd(popup_win, COLOR_PAIR(MAIN_COLOR_PAIR));
   wclear(popup_win);
   wrefresh(popup_win);
   delwin(popup_win);
-  popup_active = false;
 }
 
 int main()
