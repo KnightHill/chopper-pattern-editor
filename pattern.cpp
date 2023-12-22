@@ -37,7 +37,7 @@ int Pattern::GetPatternLen()
   return len;
 }
 
-string &Pattern::Generate()
+string &Pattern::Generate(bool save)
 {
   m_buffer.clear();
   m_buffer.append("{");
@@ -63,14 +63,13 @@ string &Pattern::Generate()
   }
 
   m_buffer.append("}},");
-  return m_buffer;
-}
 
-void Pattern::SaveCode()
-{
-  auto buffer = Generate();
-  fstream fs;
-  fs.open("pattern.txt", std::fstream::out | std::fstream::app);
-  fs << buffer << endl;
-  fs.close();
+  if (save) {
+    fstream fs;
+    fs.open("pattern.txt", std::fstream::out | std::fstream::app);
+    fs << m_buffer << endl;
+    fs.close();
+  }
+
+  return m_buffer;
 }

@@ -32,8 +32,7 @@ public:
   Element Get(size_t i) { return m_pattern[i]; }
   int GetElementLen(Element el);
 
-  std::string &Generate();
-  void SaveCode();
+  std::string &Generate(bool save = true);
 
 private:
   std::vector<Element> m_pattern;
