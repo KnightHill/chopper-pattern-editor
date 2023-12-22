@@ -4,10 +4,12 @@
 #include <format>
 #include <fstream>
 #include <ncurses.h>
+#include "pattern.h"
 
 // http://ld2009.scusa.lsu.edu/php/ref.ncurses.html
 
 using namespace std;
+/*
 
 enum Duration {
   D4, // quarter
@@ -26,12 +28,16 @@ struct Element {
 int get_element_len(Element el);
 int get_pattern_len();
 
-// pattern displa coordinates
-const int pattern_top = 7;
-const int pattern_left = 5;
 
 vector<Element> pattern;
 string buffer;
+*/
+
+Pattern pattern;
+
+// pattern display coordinates
+const int pattern_top = 7;
+const int pattern_left = 5;
 
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 
@@ -49,6 +55,7 @@ void clr_line()
   }
 }
 
+/*
 int get_pattern_len()
 {
   int len = 0;
@@ -72,12 +79,6 @@ int get_element_len(Element el)
   }
 }
 
-/*
-    {14, {
-      {1, D8}, {1, D16}, {1, D16}, {1, D16}, {1, D16}, {1, D16}, {1, D16},
-   {1, D8}, {1, D16}, {1, D16}, {1, D16}, {1, D16}, {1, D16}, {1, D16}
-   }},
-*/
 void generate()
 {
   buffer.clear();
@@ -105,11 +106,12 @@ void generate()
 
   buffer.append("}},");
 }
+*/
 
 void draw_element(Element el, int &col, int &pos)
 {
   int ch = el.type == Note ? '=' : '.';
-  int len = get_element_len(el);
+  int len = pattern.GetElementLen(el);
 
   for (int j = 0; j < len; j++) {
     int beat = (pos + j) % 8;
@@ -126,7 +128,7 @@ void draw_element(Element el, int &col, int &pos)
 
 void generatePattern()
 {
-  generate();
+  auto buffer = pattern.Generate();
   move(9, 5); // move to begining of line
   clr_line();
   mvprintw(9, 5, buffer.c_str());
@@ -169,33 +171,32 @@ int main()
     ch = getch();
     switch (ch) {
     case 'q':
-      pattern.push_back({Note, D4});
+      pattern.Add({Note, D4});
       break;
     case 'w':
-      pattern.push_back({Note, D8});
+      pattern.Add({Note, D8});
       break;
     case 'e':
-      pattern.push_back({Note, D16});
+      pattern.Add({Note, D16});
       break;
     case 'a':
-      pattern.push_back({Pause, D4});
+      pattern.Add({Pause, D4});
       break;
     case 's':
-      pattern.push_back({Pause, D8});
+      pattern.Add({Pause, D8});
       break;
     case 'd':
-      pattern.push_back({Pause, D16});
+      pattern.Add({Pause, D16});
       break;
     case 'z':
-      if (pattern.size() > 0)
-        pattern.pop_back();
+      pattern.DeleteLast();
       break;
     case 'v':
-      pattern.clear();
+      pattern.Clear();
       break;
     case 'r':
-      if (pattern.size() > 0)
-        generatePattern();
+      // if (pattern.size() > 0)
+      //   generatePattern();
       break;
     }
 
@@ -203,19 +204,19 @@ int main()
     move(pattern_top, 4); // move to begining of line
     clr_line();
 
-    int pattern_len = get_pattern_len();
+    int pattern_len = pattern.GetPatternLen();
     attron(A_UNDERLINE);
     mvprintw(5, 2, "Pattern length: %2d", pattern_len);
     attroff(A_UNDERLINE);
 
-    if (pattern.size() > 0) {
+    if (pattern.Size() > 0) {
       int col = 0;
       int pos = 0;
 
       mvaddch(pattern_top, pattern_left - 1, '|');
 
-      for (size_t i = 0; i < pattern.size(); i++) {
-        Element e = pattern[i];
+      for (size_t i = 0; i < pattern.Size(); i++) {
+        Element e = pattern.Get(i);
         draw_element(e, col, pos);
       }
     }
