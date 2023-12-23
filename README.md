@@ -15,3 +15,9 @@ Patterns are appended to the pattern.txt file when generated.
 | r | render pattern |
 | v | clear pattern |
 | x | exit |
+
+# TODO
+
+- pattern length check
+- pattern element alighnment check
+- README HTML generator
