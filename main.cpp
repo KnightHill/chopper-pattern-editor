@@ -5,40 +5,27 @@
 #include <cstring>
 
 #include <ncurses.h>
+#include "color_pairs.h"
 #include "pattern.h"
+#include "popup.h"
 
 // http://ld2009.scusa.lsu.edu/php/ref.ncurses.html
 
 using namespace std;
 
 Pattern pattern;
+Popup infoPopup(Info);
+Popup errorPopup(Error);
 
 // symbols
 const int NOTE_SYMBOL = '=';
 const int PAUSE_SYMBOL = '-';
-
-// custom colors
-const int COLOR_BRIGHT_WHITE = 8;
-const int COLOR_BRIGHT_RED = 9;
-const int COLOR_BRIGHT_GREEN = 10;
-
-// color pairs
-const int ODD_COLOR_PAIR = 1;
-const int EVEN_COLOR_PAIR = 2;
-const int POPUP_COLOR_PAIR = 3;
-const int MAIN_COLOR_PAIR = 4;
 
 // pattern display coordinates
 const int PATTERN_TOP = 8;
 const int PATTERN_LEFT = 5;
 const int CODE_TOP = 11;
 const int CODE_LEFT = 5;
-
-// toaster
-WINDOW *popup_win;
-
-// prototypes
-void toaster(const char *message);
 
 void clear_line()
 {
@@ -76,7 +63,7 @@ void generate_pattern()
     clear_line();
     mvprintw(CODE_TOP, CODE_LEFT, buffer.c_str());
     refresh();
-    toaster("File Saved");
+    infoPopup.Show("File Saved");
   }
 }
 
@@ -152,29 +139,9 @@ void init_colors()
 
   init_pair(ODD_COLOR_PAIR, COLOR_BRIGHT_WHITE, COLOR_BLACK);
   init_pair(EVEN_COLOR_PAIR, COLOR_BRIGHT_GREEN, COLOR_BLACK);
-  init_pair(POPUP_COLOR_PAIR, COLOR_BRIGHT_WHITE, COLOR_GREEN);
+  init_pair(INFO_COLOR_PAIR, COLOR_BRIGHT_WHITE, COLOR_GREEN);
+  init_pair(ERROR_COLOR_PAIR, COLOR_BRIGHT_WHITE, COLOR_RED);
   init_pair(MAIN_COLOR_PAIR, COLOR_WHITE, COLOR_BLACK);
-}
-
-void toaster(const char *message)
-{
-  int height = 3;
-  int width = 40;
-  int starty = (LINES - height) / 2; /* Calculating for a center placement */
-  int startx = (COLS - width) / 2;   /* of the window		*/
-
-  popup_win = newwin(height, width, starty, startx);
-  wbkgd(popup_win, COLOR_PAIR(POPUP_COLOR_PAIR));
-  box(popup_win, 0, 0);
-  int m_x = (width - strlen(message)) / 2;
-  mvwprintw(popup_win, 1, m_x, message);
-
-  wrefresh(popup_win);
-  napms(2000);
-  wbkgd(popup_win, COLOR_PAIR(MAIN_COLOR_PAIR));
-  wclear(popup_win);
-  wrefresh(popup_win);
-  delwin(popup_win);
 }
 
 int main()
@@ -184,7 +151,6 @@ int main()
   keypad(stdscr, TRUE); // We get F1, F2 etc..
   noecho();             // Don't echo() while we do getch
   curs_set(0);          // Hide cursor
-                        //  getmaxyx(stdscr, ROWS, LINES); // get screen dimentions
 
   if (has_colors() == FALSE) {
     endwin();
