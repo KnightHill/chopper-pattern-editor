@@ -59,11 +59,11 @@ void generate_pattern()
 {
   if (pattern.Size() > 0) {
     auto buffer = pattern.Generate();
+    infoPopup.Show("File Saved");
     move(CODE_TOP, CODE_LEFT); // move to begining of line
     clear_line();
     mvprintw(CODE_TOP, CODE_LEFT, buffer.c_str());
     refresh();
-    infoPopup.Show("File Saved");
   }
 }
 
