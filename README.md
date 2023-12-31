@@ -1,8 +1,9 @@
 # Pattern Editor
 
 A simple pattern editor for the [Daisy Chopper](https://github.com/KnightHill/daisy-chopper). Uses the ncurses library. 
-Patterns are appended to the pattern.txt file when generated.  
+Patterns are appended to pattern.txt and readme.txt when generated.  
 
+## Commands
 | Key | Command |
 | --- | --- |
 | q | add 1/4 note |
@@ -16,8 +17,8 @@ Patterns are appended to the pattern.txt file when generated.
 | v | clear pattern |
 | x | exit |
 
-# TODO
+## TODO
 
 - pattern length check
 - pattern element alighnment check
-- README HTML generator
+- ~~README HTML generator~~
