@@ -58,7 +58,8 @@ void draw_element(Element el, int &col, int &pos)
 void generate_pattern()
 {
   if (pattern.Size() > 0) {
-    auto buffer = pattern.Generate();
+    pattern.GenerateReadme();
+    auto buffer = pattern.GenerateCode();
     infoPopup.Show("File Saved");
     move(CODE_TOP, CODE_LEFT); // move to begining of line
     clear_line();
