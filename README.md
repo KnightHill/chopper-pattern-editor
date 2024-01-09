@@ -17,6 +17,8 @@ Patterns are appended to pattern.txt and readme.txt when generated.
 | v | clear pattern |
 | x | exit |
 
+![screenshot](img/editor.png)
+
 ## TODO
 
 - pattern length check
